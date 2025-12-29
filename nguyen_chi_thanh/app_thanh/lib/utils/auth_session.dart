@@ -65,27 +65,33 @@ class AuthSession {
     return isAdminRole(roleFromToken);
   }
 
+  // Cải thiện hàm check role để linh hoạt hơn
   static bool isAdminRole(String? role) {
     if (role == null) return false;
-    return role.trim().toLowerCase() == 'admin';
+    final r = role.trim().toLowerCase();
+    // Chấp nhận nhiều biến thể của Admin
+    return r == 'admin' || r == 'administrator' || r == 'quản trị viên';
   }
 
   static String? extractRoleFromDecodedToken(Map<String, dynamic> decoded) {
+    // 1. Thử các key phổ biến chứa Role
     dynamic roleValue =
         decoded['role'] ??
         decoded['roles'] ??
         decoded['Role'] ??
         decoded['Roles'] ??
-        decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ??
+        decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role']; // Thêm namespace chuẩn SOAP
 
     final normalized = _normalizeRoleValue(roleValue);
     if (normalized != null) return normalized;
 
-    // fallback: một số backend nhét role vào claim kiểu array/string khác
+    // 2. Tìm case-insensitive trong map
     for (final entry in decoded.entries) {
-      if (!entry.key.toLowerCase().contains('role')) continue;
-      final candidate = _normalizeRoleValue(entry.value);
-      if (candidate != null) return candidate;
+      if (entry.key.toLowerCase().contains('role')) {
+        final candidate = _normalizeRoleValue(entry.value);
+        if (candidate != null) return candidate;
+      }
     }
 
     return null;
@@ -94,27 +100,23 @@ class AuthSession {
   static String? _normalizeRoleValue(dynamic value) {
     if (value == null) return null;
 
-    // roles: ['Admin', 'User']
+    // Trường hợp value là List (vd: roles: ['Admin', 'User'])
     if (value is List) {
       for (final item in value) {
-        final candidate = _normalizeRoleValue(item);
-        if (candidate != null) {
-          if (candidate.toLowerCase() == 'admin') return 'Admin';
-        }
+        final s = item.toString().trim();
+        if (isAdminRole(s)) return 'Admin'; // Trả về chuỗi 'Admin' thống nhất
       }
-      // không có Admin thì thử lấy User
-      for (final item in value) {
-        final s = item?.toString().trim();
-        if (s == null || s.isEmpty) continue;
-        if (s.toLowerCase() == 'user') return 'User';
+      // Nếu không có Admin, trả về phần tử đầu tiên nếu có
+      if (value.isNotEmpty) {
+        return value.first.toString();
       }
-      return value.isNotEmpty ? value.first.toString() : null;
+      return null;
     }
 
     final s = value.toString().trim();
     if (s.isEmpty) return null;
 
-    // roles: "Admin,User" hoặc "Admin;User"
+    // Trường hợp value là chuỗi ngăn cách bởi dấu câu (vd: "Admin,User")
     final separators = [',', ';', '|'];
     for (final sep in separators) {
       if (s.contains(sep)) {
@@ -123,17 +125,17 @@ class AuthSession {
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
             .toList();
+        
+        // Ưu tiên tìm Admin trước
         for (final p in parts) {
-          if (p.toLowerCase() == 'admin') return 'Admin';
-        }
-        for (final p in parts) {
-          if (p.toLowerCase() == 'user') return 'User';
+          if (isAdminRole(p)) return 'Admin';
         }
         return parts.isNotEmpty ? parts.first : null;
       }
     }
 
-    if (s.toLowerCase() == 'admin') return 'Admin';
+    // Trường hợp chuỗi đơn
+    if (isAdminRole(s)) return 'Admin';
     if (s.toLowerCase() == 'user') return 'User';
 
     return s;
