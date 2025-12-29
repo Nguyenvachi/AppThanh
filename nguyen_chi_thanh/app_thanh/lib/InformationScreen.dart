@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import để xóa token
+import 'package:app_thanh/screens/login_screen.dart'; // Import để chuyển về màn hình đăng nhập
+import 'package:app_thanh/utils/auth_session.dart';
 import 'app_colors.dart';
 
 class InformationScreen extends StatelessWidget {
@@ -54,6 +57,21 @@ class InformationScreen extends StatelessWidget {
         SnackBar(content: Text(msg), backgroundColor: Colors.black87),
       );
     } catch (_) {}
+  }
+
+  // Hàm xử lý đăng xuất
+  Future<void> _logout(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('jwt_token');
+    await prefs.remove(AuthSession.roleKey);
+    // Có thể xóa thêm các thông tin lưu trữ khác nếu cần
+    if (context.mounted) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -165,6 +183,29 @@ class InformationScreen extends StatelessWidget {
               content: "Nguyễn Chí Thanh Official",
               isLink: true,
               onTap: () => _openYouTube("https://www.youtube.com"),
+            ),
+
+            const SizedBox(height: 30),
+
+            // ---------------------
+            // NÚT ĐĂNG XUẤT
+            // ---------------------
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: () => _logout(context),
+                icon: const Icon(Icons.logout),
+                label: const Text("Đăng xuất"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade600,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
             ),
 
             const SizedBox(height: 40),

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // [Bước 9] Thêm thư viện này
 import 'package:app_thanh/HomeScreen.dart';
 import 'package:app_thanh/app_theme.dart';
+import 'package:app_thanh/screens/login_screen.dart'; // Thêm import màn hình đăng nhập
 
-void main() {
+// [Bước 9] Cập nhật hàm main thành async để load biến môi trường
+Future<void> main() async {
+  await dotenv.load(fileName: ".env"); // Load file cấu hình .env
   runApp(const MyApp());
 }
 
@@ -20,7 +24,8 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
 
       // Màn hình đầu tiên
-      home: const HomeScreen(),
+      // Thay đổi từ HomeScreen thành LoginScreen để bắt đầu chức năng đăng nhập
+      home: const LoginScreen(),
     );
   }
 }

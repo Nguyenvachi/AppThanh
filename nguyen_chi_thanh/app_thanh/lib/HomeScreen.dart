@@ -8,6 +8,8 @@ import 'package:app_thanh/UnitConverterScreen.dart';
 import 'package:app_thanh/YouTubePlayerScreen.dart';
 import 'package:app_thanh/GroupInfoScreen.dart';
 import 'package:app_thanh/app_colors.dart';
+import 'package:app_thanh/screens/market_screen.dart';
+import 'package:app_thanh/screens/facebook_feed_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
     const AlarmClockScreen(),
     const StopwatchScreen(),
     const TranslateScreen(),
+    const MarketScreen(), // Added Market
+    const FacebookFeedScreen(), // Added FB Feed
     const GroupInfoScreen(),
     const InformationScreen(),
   ];
@@ -39,9 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
 
-      // --------------------
-      // TỐI GIẢN APPBAR
-      // --------------------
       appBar: AppBar(
         title: const Text(
           "Ứng Dụng Đa Năng",
@@ -59,9 +60,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
       body: _widgetOptions.elementAt(_selectedIndex),
 
-      // -----------------------------
-      // BOTTOM NAVIGATION TỐI GIẢN
-      // -----------------------------
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -76,12 +74,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
           selectedItemColor: Colors.black,
           unselectedItemColor: Colors.grey.shade600,
-          selectedFontSize: 11,
-          unselectedFontSize: 10,
+          selectedFontSize: 10,
+          unselectedFontSize: 9,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal),
 
-          iconSize: 22,
+          iconSize: 20,
 
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -113,6 +111,16 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icon(Icons.translate_outlined),
               activeIcon: Icon(Icons.translate),
               label: 'Dịch',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.storefront_outlined),
+              activeIcon: Icon(Icons.storefront),
+              label: 'Market',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dynamic_feed_outlined),
+              activeIcon: Icon(Icons.dynamic_feed),
+              label: 'Feed',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.groups_outlined),
